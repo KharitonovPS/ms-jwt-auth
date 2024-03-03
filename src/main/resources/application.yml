@@ -13,3 +13,6 @@ spring:
         format_sql: true
     hibernate:
       ddl-auto: update
+token:
+  signing:
+    key: sEcr3tSuperSt@rF1ndM3

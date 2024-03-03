@@ -2,10 +2,11 @@ package org.kharitonov.ms_jwt_auth.service;
 
 import org.kharitonov.ms_jwt_auth.mapper.UserMapper;
 import org.kharitonov.ms_jwt_auth.model.User;
+import org.kharitonov.ms_jwt_auth.model.dto.JwtAuthenticationResponse;
 import org.kharitonov.ms_jwt_auth.model.dto.SignUpRequest;
 import org.kharitonov.ms_jwt_auth.repository.UserRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.kharitonov.ms_jwt_auth.security.JwtProviderService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,13 +18,16 @@ public class UserService {
 
     private final UserRepository repository;
     private final UserMapper mapper;
+    private final JwtProviderService jwtProviderService;
 
-    public UserService(UserRepository repository, UserMapper mapper) {
+    @Autowired
+    public UserService(UserRepository repository, UserMapper mapper, JwtProviderService jwtProviderService) {
         this.repository = repository;
         this.mapper = mapper;
+        this.jwtProviderService = jwtProviderService;
     }
 
-    public ResponseEntity<HttpStatus> signUp(SignUpRequest request) {
+    public JwtAuthenticationResponse signUp(SignUpRequest request) {
         User user = mapper.dtoToUser(request);
         if (repository.existsUserByEmail(user.getEmail())) {
             throw new RuntimeException("User email already exist");
@@ -32,6 +36,6 @@ public class UserService {
             throw new RuntimeException("Username already taken");
         }
         repository.save(user);
-        return ResponseEntity.ok(HttpStatus.CREATED);
+        return jwtProviderService.generateToken(user);
     }
 }
