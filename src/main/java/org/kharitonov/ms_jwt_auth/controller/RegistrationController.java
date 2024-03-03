@@ -3,9 +3,7 @@ package org.kharitonov.ms_jwt_auth.controller;
 import org.kharitonov.ms_jwt_auth.model.dto.JwtAuthenticationResponse;
 import org.kharitonov.ms_jwt_auth.model.dto.SignInRequest;
 import org.kharitonov.ms_jwt_auth.model.dto.SignUpRequest;
-import org.kharitonov.ms_jwt_auth.service.UserService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.kharitonov.ms_jwt_auth.service.AuthService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,19 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class RegistrationController {
 
-    private final UserService userService;
+    private final AuthService authService;
 
-    public RegistrationController(UserService userService) {
-        this.userService = userService;
+    public RegistrationController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping("/sign-up")
     public JwtAuthenticationResponse signUp(@RequestBody SignUpRequest request){
-        return userService.signUp(request);
+        return authService.signUp(request);
     }
 
     @PostMapping("/sign-in")
     public JwtAuthenticationResponse signIn(@RequestBody SignInRequest request){
-        return userService.signIn(request);
+        return authService.signIn(request);
     }
 }

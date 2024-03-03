@@ -12,7 +12,6 @@ import java.io.IOException;
  * @author Kharitonov Pavel on 03.03.2024.
  */
 @Component
-@Order(1)
 @Slf4j
 public class JwtFilter implements Filter {
     @Override
