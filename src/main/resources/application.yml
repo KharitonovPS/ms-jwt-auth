@@ -12,7 +12,7 @@ spring:
         use_sql_comments: true
         format_sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
 token:
   signing:
-    key: sEcr3tSuperSt@rF1ndM3
+    key: L1HJK23L12H51O5JOP109124KNAKFMNL4HNK513JH12P47D1F6E0A2D3B5F247D1

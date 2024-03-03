@@ -5,7 +5,6 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.codec.binary.Base64;
@@ -17,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ import java.util.Map;
  * @author Kharitonov Pavel on 03.03.2024.
  */
 @Service
-public class JwtProviderService {
+public class JwtProvider {
 
     @Value("${token.signing.key}")
     private String jwtSigningKey;
@@ -32,6 +32,10 @@ public class JwtProviderService {
     @PostConstruct
     void init() {
         jwtSigningKey = Base64.encodeBase64String(jwtSigningKey.getBytes());
+    }
+
+    private Algorithm getAlgorithm() {
+        return Algorithm.HMAC256(jwtSigningKey);
     }
 
     public JwtAuthenticationResponse generateToken(User user) {
@@ -57,8 +61,27 @@ public class JwtProviderService {
         return new JwtAuthenticationResponse(token);
     }
 
-    private Algorithm getAlgorithm() {
-        return Algorithm.HMAC256(jwtSigningKey);
+    public String extractRole(String jwtToken) {
+        DecodedJWT decodedJWT = extractClaimFromToken(jwtToken);
+        return decodedJWT.getClaim("role").asString();
+    }
+
+
+    public boolean isTokenValid(String jwtToken, User user) {
+        final String userName = extractUsername(jwtToken);
+        return (userName.equals(user.getUsername()) && !isTokenExpired(jwtToken));
+    }
+
+
+    private String extractUsername(String jwtToken) {
+        DecodedJWT decodedJWT = extractClaimFromToken(jwtToken);
+        return decodedJWT.getClaim("username").asString();
+    }
+
+    private boolean isTokenExpired(String jwtToken) {
+        DecodedJWT decodedJWT = extractClaimFromToken(jwtToken);
+        Date expiresAt = decodedJWT.getExpiresAt();
+        return expiresAt.before(new Date());
     }
 
     private JWTVerifier getVerifier() {
@@ -67,22 +90,16 @@ public class JwtProviderService {
                 .build();
     }
 
-    public boolean verify(String jwtToken) {
-        // декодим в трай кеч
+    private DecodedJWT extractClaimFromToken(String jwtToken) {
         DecodedJWT decodedJWT;
         try {
             decodedJWT = getVerifier().verify(jwtToken);
         } catch (JWTVerificationException e) {
             throw new JwtNotValidException(
-                    "Invalid Signing configuration or JWT out of data.",
+                    "Invalid Signing configuration or JWT was expired",
                     HttpStatus.UNAUTHORIZED
             );
         }
-        //вытащили клейм и конверт в стрингу
-        Claim claim = decodedJWT.getClaim("role");
-        String role = claim.asString();
-
-        //осталось настроить фильтры с верифаером
-        return true;
+        return decodedJWT;
     }
 }
