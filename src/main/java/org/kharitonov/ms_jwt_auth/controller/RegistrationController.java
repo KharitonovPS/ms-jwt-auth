@@ -23,12 +23,12 @@ public class RegistrationController {
     }
 
     @PostMapping("/sign-up")
-    public JwtAuthenticationResponse signUp(@RequestBody SignUpRequest request){
+    public JwtAuthenticationResponse signUp(@RequestBody SignUpRequest request) {
         return authService.signUp(request);
     }
 
     @PostMapping("/sign-in")
-    public JwtAuthenticationResponse signIn(@RequestBody SignInRequest request){
+    public JwtAuthenticationResponse signIn(@RequestBody SignInRequest request) {
         return authService.signIn(request);
     }
 }

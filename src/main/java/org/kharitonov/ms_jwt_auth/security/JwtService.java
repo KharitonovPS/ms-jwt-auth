@@ -28,7 +28,7 @@ public class JwtService {
     @Value("${token.signing.key}")
     private String jwtSigningKey;
 
-    private Map<String,String> claimMap = new HashMap<>();
+    private Map<String, String> claimMap = new HashMap<>();
 
     @PostConstruct
     void init() {
@@ -40,6 +40,7 @@ public class JwtService {
                 .withIssuer("jwt-auth")
                 .build();
     }
+
     public JwtAuthenticationResponse generateToken(User user) {
         Map<String, String> claims = new HashMap<>();
         claims.put("id", String.valueOf(user.getId()));
@@ -61,13 +62,14 @@ public class JwtService {
         }
         return new JwtAuthenticationResponse(token);
     }
+
     public boolean isTokenValid(String jwtToken, User user) {
         final String userName = extractUsername(jwtToken);
         return (userName.equals(user.getUsername()) && !isTokenExpired());
     }
 
     public String extractUsername(String jwtToken) {
-        if (claimMap.isEmpty()){
+        if (claimMap.isEmpty()) {
             extractClaimFromToken(jwtToken);
         }
         return claimMap.get("username");
@@ -93,7 +95,7 @@ public class JwtService {
         }
     }
 
-    private String cutClaim(Claim claim){
+    private String cutClaim(Claim claim) {
         return claim.toString().substring(1, claim.toString().length() - 1);
     }
 }

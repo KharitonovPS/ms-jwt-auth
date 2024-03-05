@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MsJwtAuthApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MsJwtAuthApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MsJwtAuthApplication.class, args);
+    }
 
 }

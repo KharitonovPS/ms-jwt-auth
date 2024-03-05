@@ -6,8 +6,6 @@ import org.kharitonov.ms_jwt_auth.model.User;
 import org.kharitonov.ms_jwt_auth.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
  * @author Kharitonov Pavel on 03.03.2024.
  */

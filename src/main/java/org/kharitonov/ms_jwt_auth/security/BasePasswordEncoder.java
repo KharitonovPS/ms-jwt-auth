@@ -13,7 +13,7 @@ public class BasePasswordEncoder {
 
     private final static Base64 BASE_64 = new Base64();
 
-    public String encode(String password){
+    public String encode(String password) {
         return BASE_64.encodeAsString(password.getBytes(StandardCharsets.UTF_8));
     }
 }

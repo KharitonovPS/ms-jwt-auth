@@ -30,9 +30,9 @@ public class AuthService {
     public JwtAuthenticationResponse signIn(SignInRequest request) {
         User user = mapper.dtoToUser(request);
         User dbUser;
-        try{
+        try {
             dbUser = userService.findByUsername(user.getUsername());
-        } catch (UsernameNotFoundException e){
+        } catch (UsernameNotFoundException e) {
             return new JwtAuthenticationResponse(e.getMessage());
         }
         if (dbUser.getPassword().equals(user.getPassword())) {

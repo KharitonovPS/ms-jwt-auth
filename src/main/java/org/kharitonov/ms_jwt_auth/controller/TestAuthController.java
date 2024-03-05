@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestAuthController {
 
     @GetMapping("/hello")
-    public String hello(){
+    public String hello() {
         return "Hello world";
     }
 
     @GetMapping("/hello/admin")
-    public String helloAdmin(){
+    public String helloAdmin() {
         return "Hello Admin";
     }
 
