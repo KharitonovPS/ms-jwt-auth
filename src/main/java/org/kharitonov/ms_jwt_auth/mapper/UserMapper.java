@@ -26,6 +26,7 @@ public class UserMapper {
         user.setPassword(encoder.encode(request.password()));
         user.setEmail(request.email());
         user.setRoles(Collections.singleton(UserRole.ROLE_USER));
+        user.setActive(true);
         return user;
     }
 

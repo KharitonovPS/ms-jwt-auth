@@ -26,8 +26,13 @@ public class User {
     @Column(name = "user_password")
     private String password;
 
+    @Column(name = "user_state")
+    private boolean isActive;
+
     @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     private Set<UserRole> roles;
+
+    ;
 }

@@ -7,21 +7,17 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import jakarta.annotation.PostConstruct;
+import org.apache.commons.codec.binary.Base64;
 import org.kharitonov.ms_jwt_auth.exceptions.JwtNotValidException;
 import org.kharitonov.ms_jwt_auth.model.User;
-import org.kharitonov.ms_jwt_auth.model.UserRole;
 import org.kharitonov.ms_jwt_auth.model.dto.JwtAuthenticationResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.Role;
 import java.time.Instant;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.kharitonov.ms_jwt_auth.model.UserRole.fromString;
 
 /**
  * @author Kharitonov Pavel on 03.03.2024.
@@ -32,11 +28,18 @@ public class JwtService {
     @Value("${token.signing.key}")
     private String jwtSigningKey;
 
-//    @PostConstruct
-//    void init() {
-//        jwtSigningKey = Base64.encodeBase64String(jwtSigningKey.getBytes());
-//    }
+    private Map<String,String> claimMap = new HashMap<>();
 
+    @PostConstruct
+    void init() {
+        jwtSigningKey = Base64.encodeBase64String(jwtSigningKey.getBytes());
+    }
+
+    private JWTVerifier getVerifier() {
+        return JWT.require(Algorithm.HMAC256(jwtSigningKey))
+                .withIssuer("jwt-auth")
+                .build();
+    }
     public JwtAuthenticationResponse generateToken(User user) {
         Map<String, String> claims = new HashMap<>();
         claims.put("id", String.valueOf(user.getId()));
@@ -54,73 +57,43 @@ public class JwtService {
                     .sign(Algorithm.HMAC256(jwtSigningKey));
         } catch (JWTCreationException | IllegalArgumentException exception) {
             throw new JwtNotValidException(
-                    "Invalid Signing configuration / Couldn't convert Claims.",
-                    HttpStatus.UNAUTHORIZED
-            );
+                    "Неправильная конфигурация подписи / невозможно декодировать Claims");
         }
         return new JwtAuthenticationResponse(token);
     }
+    public boolean isTokenValid(String jwtToken, User user) {
+        final String userName = extractUsername(jwtToken);
+        return (userName.equals(user.getUsername()) && !isTokenExpired());
+    }
 
     public String extractUsername(String jwtToken) {
-        Map<String, String> claimMap = extractClaimFromToken(jwtToken);
+        if (claimMap.isEmpty()){
+            extractClaimFromToken(jwtToken);
+        }
         return claimMap.get("username");
     }
 
-//    public String extractUserName(String jwtToken) {
-//        DecodedJWT decodedJWT = extractClaimFromToken(jwtToken);
-//        return decodedJWT.getClaim("username").asString();
-//    }
-
-
-    public boolean isTokenValid(String jwtToken, User user) {
-        final String userName = extractUsername(jwtToken);
-        Map<String, String> claimMap = extractClaimFromToken(jwtToken);
-        return (userName.equals(user.getUsername()) && !isTokenExpired(claimMap));
-    }
-
-
-    public UserRole extractRole(String jwtToken) {
-        Map<String, String> stringMap = extractClaimFromToken(jwtToken);
-        UserRole role;
-        try {
-            role = fromString(stringMap.get("role"));
-        } catch (NullPointerException e){
-            //null role=[ROLE_USER]
-            role =UserRole.ROLE_UNAUTHORIZED;
-        }
-        return role;
-    }
-
-    private boolean isTokenExpired(Map<String, String> map) {
-        Instant expiresAt = Instant.parse(map.get("ExpiresAt"));
-//        Data expiresAt = map.get("eat").toString();
+    private boolean isTokenExpired() {
+        Instant expiresAt = Instant.parse(claimMap.get("ExpiresAt"));
         return expiresAt.isBefore(Instant.now());
-//        return true;
     }
 
-    private JWTVerifier getVerifier() {
-        return JWT.require(Algorithm.HMAC256(jwtSigningKey))
-                .withIssuer("jwt-auth")
-                .build();
-    }
-
-
-    protected Map<String, String> extractClaimFromToken(String jwtToken) {
-        Map<String, String> resultMap = new HashMap<>();
+    private void extractClaimFromToken(String jwtToken) {
         try {
             DecodedJWT decodedJWT = getVerifier().verify(jwtToken);
             Map<String, Claim> claims = decodedJWT.getClaims();
-            Map<String, Object> payloadMap = claims.get("claims").asMap();
-            payloadMap.forEach((k, v) -> {
-                resultMap.put(k, v.toString());
-            });
-            resultMap.put("ExpiresAt", decodedJWT.getExpiresAt().toInstant().toString());
+            if (claims != null && !claims.isEmpty()) {
+                claims.forEach((k, v) -> {
+                    claimMap.put(k, cutClaim(v));
+                });
+                claimMap.put("ExpiresAt", decodedJWT.getExpiresAt().toInstant().toString());
+            }
         } catch (JWTVerificationException e) {
-            throw new JwtNotValidException(
-                    "Invalid Signing configuration or JWT was expired",
-                    HttpStatus.UNAUTHORIZED
-            );
+            throw new JwtNotValidException("Не верный JWT, пустые claims");
         }
-        return resultMap;
+    }
+
+    private String cutClaim(Claim claim){
+        return claim.toString().substring(1, claim.toString().length() - 1);
     }
 }

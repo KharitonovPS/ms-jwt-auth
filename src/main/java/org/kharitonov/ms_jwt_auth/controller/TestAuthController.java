@@ -15,4 +15,10 @@ public class TestAuthController {
     public String hello(){
         return "Hello world";
     }
+
+    @GetMapping("/hello/admin")
+    public String helloAdmin(){
+        return "Hello Admin";
+    }
+
 }

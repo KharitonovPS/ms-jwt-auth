@@ -6,6 +6,8 @@ import org.kharitonov.ms_jwt_auth.model.User;
 import org.kharitonov.ms_jwt_auth.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @author Kharitonov Pavel on 03.03.2024.
  */
@@ -17,10 +19,10 @@ public class UserService {
 
     public void createUser(User user) {
         if (repository.existsUserByEmail(user.getEmail())) {
-            throw new RuntimeException("User email already exist");
+            throw new RuntimeException("Почтовый ящик уже используется другим пользователем");
         }
         if (repository.existsUserByUsername(user.getEmail())) {
-            throw new RuntimeException("Username already taken");
+            throw new RuntimeException("Имя пользователя уже занято");
         }
         repository.save(user);
     }

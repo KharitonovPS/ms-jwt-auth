@@ -7,10 +7,8 @@ import org.springframework.http.HttpStatus;
  */
 public class JwtNotValidException extends RuntimeException{
 
-    HttpStatus httpStatus;
 
-    public JwtNotValidException(String message, HttpStatus httpStatus) {
+    public JwtNotValidException(String message) {
         super(message);
-        this.httpStatus = httpStatus;
     }
 }
