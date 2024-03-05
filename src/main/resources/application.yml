@@ -15,4 +15,4 @@ spring:
       ddl-auto: validate
 token:
   signing:
-    key: L1HJK23L12H51O5JOP109124KNAKFMNL4HNK513JH12P47D1F6E0A2D3B5F247D1
+    key: MyLittlePony
