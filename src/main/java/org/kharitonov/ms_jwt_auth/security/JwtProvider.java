@@ -23,10 +23,13 @@ import java.util.Map;
  * @author Kharitonov Pavel on 03.03.2024.
  */
 @Service
-public class JwtService {
+public class JwtProvider {
 
-    @Value("${token.signing.key}")
+    @Value("${jwtToken.signingKey}")
     private String jwtSigningKey;
+
+    @Value("${jwtToken.lifetime}")
+    private long lifetime;
 
     private Map<String, String> claimMap = new HashMap<>();
 
@@ -54,7 +57,7 @@ public class JwtService {
                     .withPayload(claims)
                     .withIssuedAt(Instant.now())
                     .withIssuer("jwt-auth")
-                    .withExpiresAt(Instant.now().plusSeconds(60 * 60 * 24))
+                    .withExpiresAt(Instant.now().plusSeconds(lifetime))
                     .sign(Algorithm.HMAC256(jwtSigningKey));
         } catch (JWTCreationException | IllegalArgumentException exception) {
             throw new JwtNotValidException(
@@ -65,7 +68,12 @@ public class JwtService {
 
     public boolean isTokenValid(String jwtToken, User user) {
         final String userName = extractUsername(jwtToken);
-        return (userName.equals(user.getUsername()) && !isTokenExpired());
+        if (userName.equals(user.getUsername()) && !isTokenExpired()){
+            claimMap.clear();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public String extractUsername(String jwtToken) {

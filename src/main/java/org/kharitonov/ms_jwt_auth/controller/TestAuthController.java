@@ -8,15 +8,15 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Kharitonov Pavel on 03.03.2024.
  */
 @RestController
-@RequestMapping("/api/v1/test")
+@RequestMapping("/api/v1/hello")
 public class TestAuthController {
 
-    @GetMapping("/hello")
+    @GetMapping("")
     public String hello() {
         return "Hello world";
     }
 
-    @GetMapping("/hello/admin")
+    @GetMapping("/admin")
     public String helloAdmin() {
         return "Hello Admin";
     }

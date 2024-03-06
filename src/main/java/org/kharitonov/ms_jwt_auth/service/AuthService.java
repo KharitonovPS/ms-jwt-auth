@@ -7,7 +7,7 @@ import org.kharitonov.ms_jwt_auth.model.User;
 import org.kharitonov.ms_jwt_auth.model.dto.JwtAuthenticationResponse;
 import org.kharitonov.ms_jwt_auth.model.dto.SignInRequest;
 import org.kharitonov.ms_jwt_auth.model.dto.SignUpRequest;
-import org.kharitonov.ms_jwt_auth.security.JwtService;
+import org.kharitonov.ms_jwt_auth.security.JwtProvider;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,12 +19,12 @@ public class AuthService {
 
     private final UserService userService;
     private final UserMapper mapper;
-    private final JwtService jwtService;
+    private final JwtProvider jwtProvider;
 
     public JwtAuthenticationResponse signUp(SignUpRequest request) {
         User user = mapper.dtoToUser(request);
         userService.createUser(user);
-        return jwtService.generateToken(user);
+        return jwtProvider.generateToken(user);
     }
 
     public JwtAuthenticationResponse signIn(SignInRequest request) {
@@ -36,7 +36,7 @@ public class AuthService {
             return new JwtAuthenticationResponse(e.getMessage());
         }
         if (dbUser.getPassword().equals(user.getPassword())) {
-            return jwtService.generateToken(dbUser);
+            return jwtProvider.generateToken(dbUser);
         }
         return new JwtAuthenticationResponse("Пароль указан неверно!");
     }
